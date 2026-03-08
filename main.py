@@ -1,5 +1,7 @@
 import pygame
 
+from dataclasses import dataclass
+
 pygame.init()
 display = pygame.display.set_mode((1920, 1080))
 running = True
@@ -16,40 +18,58 @@ player1_healthoutline = pygame.Rect(495, 455, player1_health + 10, 30)
 player2_healthoutline = pygame.Rect(1195, 455, player2_health + 10, 30)
 player1_healthbar = pygame.Rect(500, 460, player1_health, 20)
 player2_healthbar = pygame.Rect(1200, 460, player2_health, 20)
+
+@dataclass
+class Controls:
+    left: int
+    right: int
+    up: int
+    down: int
+    #punch: int
+    #kick: int
+
+class Player:
+    def __init__(self, x, y, controls):
+        self.image = pygame.image.load("Fighter1.png")
+        self.x = x
+        self.y = y
+        self.controls = controls
+        self.health = 100
+        self.speed = 1
+        self.jumpheight = 10
+        self.gravity = 1
+        self.controls = controls
+        self.attack = ""
+    def movement(self, keys):
+        if keys[self.controls.left]:
+            self.x -= 1
+        if keys[self.controls.right]:
+            self.x += 1
+        if keys[self.controls.up]:
+            self.y -= 1
+        if keys[self.controls.down]:
+            self.y += 1
+
+player1 = Player(500, 500, Controls(
+    left = pygame.K_a,
+    right = pygame.K_d,
+    up = pygame.K_w,
+    down = pygame.K_s
+    ))
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-        player1_outline.x -= 1
-        player1.x -= 1
-        player1_healthoutline.x -= 1
-        player1_healthbar.x -= 1
-    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-        player1_outline.x += 1
-        player1.x += 1
-        player1_healthoutline.x += 1
-        player1_healthbar.x += 1
-    if keys[pygame.K_w] or keys[pygame.K_UP] or keys[pygame.K_SPACE]:
-        player1_outline.y -= 1
-        player1.y -= 1
-        player1_healthoutline.y -= 1
-        player1_healthbar.y -= 1
-    if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-        player1_outline.y += 1
-        player1.y += 1
-        player1_healthoutline.y += 1
-        player1_healthbar.y += 1
+    
     display.fill((0, 200, 200))
     pygame.draw.rect(display, (100, 0, 0), land)
-    pygame.draw.rect(display, (0, 0, 0), player1_outline)
-    pygame.draw.rect(display, (0, 0, 0), player2_outline)
-    pygame.draw.rect(display, (0, 0, 255), player1)
-    pygame.draw.rect(display, (255, 0, 0), player2)
-    pygame.draw.rect(display, (0, 0, 0), player1_healthoutline)
-    pygame.draw.rect(display, (0, 0, 0), player2_healthoutline)
-    pygame.draw.rect(display, (0, 255, 0), player1_healthbar)
-    pygame.draw.rect(display, (0, 255, 0), player2_healthbar)
+
+    player1.movement(keys)
+    display.blit(player1.image, (player1.x, player1.y))
+
+    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(495, 45, player1.health + 10, 30))
+    pygame.draw.rect(display, (0, 255, 0), pygame.Rect(500, 50, player1.health, 20))
     pygame.display.flip()
     clock.tick(240)
