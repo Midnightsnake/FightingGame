@@ -15,12 +15,12 @@ class Controls:
     right: int
     up: int
     down: int
-    #punch: int
-    #kick: int
+    punch: int
+    kick: int
 
 class Player:
     def __init__(self, x, y, controls):
-        self.image = pygame.image.load("Fighter1.png")
+        self.image = pygame.image.load("fighter1_default.png")
         self.image = pygame.transform.scale(self.image, (400, 400))
         self.x = x
         self.y = y
@@ -40,12 +40,21 @@ class Player:
             self.y -= 1
         if keys[self.controls.down]:
             self.y += 1
+    def attack(self, keys):
+        self.image = pygame.image.load("fighter1_punch.png")
+        self.image = pygame.transform.scale(self.image, (400, 400))
+        #For 1-2 seconds, it changes to this image then back to default
+        #Check for hitbox, x-position difference to see if it hits,
+        #y position for punch vs kick, -10 health once
+        #potential blocking/dodging mechanics?
 
 player1 = Player(350, 420, Controls(
     left = pygame.K_a,
     right = pygame.K_d,
     up = pygame.K_w,
     down = pygame.K_s
+    punch = pygame.K_Q
+    kick = pygame.K_E
     ))
 
 player2 = Player(1200, 420, Controls(
@@ -53,6 +62,8 @@ player2 = Player(1200, 420, Controls(
     right = pygame.K_RIGHT,
     up = pygame.K_UP,
     down = pygame.K_DOWN
+    punch = pygame.K_Q
+    kick = pygame.K_E
     ))
 
 while running:
