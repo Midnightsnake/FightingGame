@@ -8,16 +8,6 @@ running = True
 clock = pygame.time.Clock()
 powers = {"Punch, Kick"}
 land = pygame.Rect(0, 800, 2000, 200)
-player1_outline = pygame.Rect(495, 495, 110, 110)
-player2_outline = pygame.Rect(1195, 495, 110, 110)
-player1 = pygame.Rect(500, 500, 100, 100)
-player2 = pygame.Rect(1200, 500, 100, 100)
-player1_health = 100
-player2_health = 100
-player1_healthoutline = pygame.Rect(495, 455, player1_health + 10, 30)
-player2_healthoutline = pygame.Rect(1195, 455, player2_health + 10, 30)
-player1_healthbar = pygame.Rect(500, 460, player1_health, 20)
-player2_healthbar = pygame.Rect(1200, 460, player2_health, 20)
 
 @dataclass
 class Controls:
@@ -31,6 +21,7 @@ class Controls:
 class Player:
     def __init__(self, x, y, controls):
         self.image = pygame.image.load("Fighter1.png")
+        self.image = pygame.transform.scale(self.image, (400, 400))
         self.x = x
         self.y = y
         self.controls = controls
@@ -50,11 +41,18 @@ class Player:
         if keys[self.controls.down]:
             self.y += 1
 
-player1 = Player(500, 500, Controls(
+player1 = Player(350, 420, Controls(
     left = pygame.K_a,
     right = pygame.K_d,
     up = pygame.K_w,
     down = pygame.K_s
+    ))
+
+player2 = Player(1200, 420, Controls(
+    left = pygame.K_LEFT,
+    right = pygame.K_RIGHT,
+    up = pygame.K_UP,
+    down = pygame.K_DOWN
     ))
 
 while running:
@@ -69,7 +67,12 @@ while running:
     player1.movement(keys)
     display.blit(player1.image, (player1.x, player1.y))
 
-    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(495, 45, player1.health + 10, 30))
-    pygame.draw.rect(display, (0, 255, 0), pygame.Rect(500, 50, player1.health, 20))
+    player2.movement(keys)
+    display.blit(player2.image, (player2.x, player2.y))
+
+    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(315, 125, 410, 50))
+    pygame.draw.rect(display, (0, 255, 0), pygame.Rect(320, 130, player1.health * 4, 40))
+    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(1155, 125, 410, 50))
+    pygame.draw.rect(display, (0, 255, 0), pygame.Rect(1160, 130, player2.health * 4, 40))
     pygame.display.flip()
     clock.tick(240)
