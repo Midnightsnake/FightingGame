@@ -6,12 +6,13 @@ pygame.init()
 display = pygame.display.set_mode((1920, 1080))
 font1 = pygame.font.SysFont(None, 32)
 font2 = pygame.font.SysFont(None, 52)
-text1 = font1.render("Settings", True, (0, 0, 0))
-text2 = font2.render("Settings (Incomplete)", True, (0, 0, 0))
-text3 = font1.render("X", True, (0, 0, 0))
-text4 = font1.render("Tutorial", True, (0, 0, 0))
-text5 = font1.render("Characters", True, (0, 0, 0))
-text6 = font1.render("Shop", True, (0, 0, 0))
+text1 = font1.render("Scoreboard", True, (0, 0, 0))
+text2 = font1.render("Settings", True, (0, 0, 0))
+text3 = font2.render("Settings (Incomplete)", True, (0, 0, 0))
+text4 = font1.render("X", True, (0, 0, 0))
+text5 = font1.render("Tutorial", True, (0, 0, 0))
+text6 = font1.render("Characters", True, (0, 0, 0))
+text7 = font1.render("Shop", True, (0, 0, 0))
 running = True
 clock = pygame.time.Clock()
 settings_visible = False
@@ -44,6 +45,7 @@ class Player:
         self.currently_attacking = False
         self.x = x
         self.y = y
+        self.hitbefore = False
         self.direction = "Right"
         self.controls = controls
         self.health = 100
@@ -82,13 +84,15 @@ class Player:
             
         if self.attack_time > 0:
             self.attack_time -= 1
-            if ((opponent.x - self.x) < 300 and self.direction == "Right") or ((self.x - opponent.x) < 300 and self.direction == "Left"):
+            if ((opponent.x - self.x) < 300 and self.direction == "Right") or ((self.x - opponent.x) < 300 and self.direction == "Left") and self.hitbefore == False:
                 self.currently_attacking = False
                 self.attack_time = 0
                 opponent.health -= 10
+                self.hitbefore = True
         else:
             self.image = self.image_default
             self.currently_attacking = False
+            self.hitbefore = False
 
 player1 = Player(350, 420, Controls(
     left = pygame.K_a,
@@ -136,23 +140,26 @@ while running:
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(1145, 125, 410, 50))
     pygame.draw.rect(display, (0, 255, 0), pygame.Rect(1150, 130, player2.health * 4, 40))
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(220, 125, 110, 110))
+    display.blit(text1, (730, 165))
+    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(220, 125, 110, 110))
     settings_rect = pygame.draw.rect(display, (255, 255, 255), pygame.Rect(225, 130, 100, 100))
-    display.blit(text1, (230, 165))
+    settings_closerect = pygame.Rect(1090, 225, 50, 50)
+    display.blit(text2, (230, 165))
     if settings_visible == True:
         pygame.draw.rect(display, (0, 0, 0), pygame.Rect(685, 220, 460, 660))
         pygame.draw.rect(display, (255, 255, 255), pygame.Rect(690, 225, 450, 650))
-        display.blit(text2, (720, 270))
+        display.blit(text3, (720, 270))
         pygame.draw.rect(display, (0, 0, 0), pygame.Rect(1085, 220, 60, 60))
         settings_closerect = pygame.draw.rect(display, (255, 0, 0), pygame.Rect(1090, 225, 50, 50))
-        display.blit(text3, (1107, 240))
+        display.blit(text4, (1107, 240))
         pygame.draw.rect(display, (0, 0, 0), pygame.Rect(775, 360, 110, 110))
         pygame.draw.rect(display, (0, 255, 255), pygame.Rect(780, 365, 100, 100))
-        display.blit(text4, (790, 400))
+        display.blit(text5, (790, 400))
         pygame.draw.rect(display, (0, 0, 0), pygame.Rect(955, 360, 110, 110))
         pygame.draw.rect(display, (0, 150, 255), pygame.Rect(960, 365, 100, 100))
-        display.blit(text5, (970, 400))
+        display.blit(text6, (970, 400))
         pygame.draw.rect(display, (0, 0, 0), pygame.Rect(775, 510, 110, 110))
         pygame.draw.rect(display, (255, 50, 50), pygame.Rect(780, 515, 100, 100))
-        display.blit(text6, (800, 550))
+        display.blit(text7, (800, 550))
     pygame.display.flip()
     clock.tick(240)
