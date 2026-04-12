@@ -8,8 +8,10 @@ font1 = pygame.font.SysFont(None, 32)
 font2 = pygame.font.SysFont(None, 52)
 text1 = font1.render("Settings", True, (0, 0, 0))
 text2 = font2.render("Settings (Incomplete)", True, (0, 0, 0))
-text3 = font1.render("Tutorial", True, (0, 0, 0))
-text4 = font1.render("Characters", True, (0, 0, 0))
+text3 = font1.render("X", True, (0, 0, 0))
+text4 = font1.render("Tutorial", True, (0, 0, 0))
+text5 = font1.render("Characters", True, (0, 0, 0))
+text6 = font1.render("Shop", True, (0, 0, 0))
 running = True
 clock = pygame.time.Clock()
 settings_visible = False
@@ -32,14 +34,17 @@ class Player:
         self.image_default = pygame.image.load("fighter1_default.png")
         self.image_default = pygame.transform.scale(self.image_default, (400, 400))
         self.image_punch = pygame.image.load("fighter1_punch.png")
-        self.image_punch = pygame.transform.scale(self.image_punch, (400, 400))
+        self.image_punch_right = pygame.transform.scale(self.image_punch, (400, 400))
+        self.image_punch_left = pygame.transform.flip(self.image_punch_right, True, False)
         self.image_kick = pygame.image.load("fighter1_kick.png")
-        self.image_kick = pygame.transform.scale(self.image_kick, (400, 400))
+        self.image_kick_right = pygame.transform.scale(self.image_kick, (400, 400))
+        self.image_kick_left = pygame.transform.flip(self.image_kick_right, True, False)
         self.image = self.image_default
         self.attack_time = 0
         self.currently_attacking = False
         self.x = x
         self.y = y
+        self.direction = "Right"
         self.controls = controls
         self.health = 100
         self.speed = 1
@@ -49,25 +54,38 @@ class Player:
     def movement(self, keys):
         if keys[self.controls.left]:
             self.x -= 1
+            self.direction = "Left"
         if keys[self.controls.right]:
             self.x += 1
+            self.direction = "Right"
         if keys[self.controls.up]:
             self.y -= 1
         if keys[self.controls.down]:
             self.y += 1
-    def attack(self, keys):
+    def attack(self, keys, opponent):
 
         if keys[self.controls.punch] and self.currently_attacking == False:
             self.currently_attacking = True
-            self.image = self.image_punch
+            if self.direction == "Right":
+                self.image = self.image_punch_right
+            else:
+                self.image = self.image_punch_left
             self.attack_time = 60
 
-        if keys[self.controls.kick] and self.currently_attacking == False:
+        elif keys[self.controls.kick] and self.currently_attacking == False:
             self.currently_attacking = True
-            self.image = self.image_kick
+            if self.direction == "Right":
+                self.image = self.image_kick_right
+            else:
+                self.image = self.image_kick_left
             self.attack_time = 60
+            
         if self.attack_time > 0:
             self.attack_time -= 1
+            if ((opponent.x - self.x) < 300 and self.direction == "Right") or ((self.x - opponent.x) < 300 and self.direction == "Left"):
+                self.currently_attacking = False
+                self.attack_time = 0
+                opponent.health -= 10
         else:
             self.image = self.image_default
             self.currently_attacking = False
@@ -98,6 +116,8 @@ while running:
             mousepos = pygame.mouse.get_pos()
             if settings_rect.collidepoint(mousepos):
                 settings_visible = True
+            elif settings_closerect.collidepoint(mousepos):
+                settings_visible = False
     keys = pygame.key.get_pressed()
     
     display.fill((0, 200, 200))
@@ -106,7 +126,7 @@ while running:
     player1.movement(keys)
     display.blit(player1.image, (player1.x, player1.y))
 
-    player1.attack(keys)
+    player1.attack(keys, player2)
 
     player2.movement(keys)
     display.blit(player2.image, (player2.x, player2.y))
@@ -119,14 +139,20 @@ while running:
     settings_rect = pygame.draw.rect(display, (255, 255, 255), pygame.Rect(225, 130, 100, 100))
     display.blit(text1, (230, 165))
     if settings_visible == True:
-        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(615, 120, 460, 660))
-        pygame.draw.rect(display, (255, 255, 255), pygame.Rect(620, 125, 450, 650))
-        display.blit(text2, (650, 170))
-        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(625, 220, 110, 110))
-        pygame.draw.rect(display, (0, 255, 255), pygame.Rect(630, 225, 100, 100))
-        display.blit(text3, (640, 260))
-        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(625, 340, 110, 110))
-        pygame.draw.rect(display, (0, 150, 255), pygame.Rect(630, 345, 100, 100))
-        display.blit(text4, (640, 380))
+        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(685, 220, 460, 660))
+        pygame.draw.rect(display, (255, 255, 255), pygame.Rect(690, 225, 450, 650))
+        display.blit(text2, (720, 270))
+        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(1085, 220, 60, 60))
+        settings_closerect = pygame.draw.rect(display, (255, 0, 0), pygame.Rect(1090, 225, 50, 50))
+        display.blit(text3, (1107, 240))
+        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(775, 360, 110, 110))
+        pygame.draw.rect(display, (0, 255, 255), pygame.Rect(780, 365, 100, 100))
+        display.blit(text4, (790, 400))
+        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(955, 360, 110, 110))
+        pygame.draw.rect(display, (0, 150, 255), pygame.Rect(960, 365, 100, 100))
+        display.blit(text5, (970, 400))
+        pygame.draw.rect(display, (0, 0, 0), pygame.Rect(775, 510, 110, 110))
+        pygame.draw.rect(display, (255, 50, 50), pygame.Rect(780, 515, 100, 100))
+        display.blit(text6, (800, 550))
     pygame.display.flip()
     clock.tick(240)
