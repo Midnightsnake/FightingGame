@@ -6,7 +6,8 @@ pygame.init()
 display = pygame.display.set_mode((1920, 1080))
 font1 = pygame.font.SysFont(None, 32)
 font2 = pygame.font.SysFont(None, 52)
-text1 = font1.render("Scoreboard", True, (0, 0, 0))
+font3 = pygame.font.SysFont(None, 72)
+text1 = font2.render("Scoreboard", True, (0, 0, 0))
 text2 = font1.render("Settings", True, (0, 0, 0))
 text3 = font2.render("Settings (Incomplete)", True, (0, 0, 0))
 text4 = font1.render("X", True, (0, 0, 0))
@@ -53,6 +54,7 @@ class Player:
         self.jumpheight = 10
         self.gravity = 1
         self.controls = controls
+        self.score = 0
     def movement(self, keys):
         if keys[self.controls.left]:
             self.x -= 1
@@ -123,6 +125,23 @@ while running:
             elif settings_closerect.collidepoint(mousepos):
                 settings_visible = False
     keys = pygame.key.get_pressed()
+
+    if player1.health <= 0:
+        player1.x = 350
+        player1.y = 420
+        player2.x = 1200
+        player2.y = 420
+        player2.score += 1
+        player1.health = 100
+    if player2.health <= 0:
+        player1.x = 350
+        player1.y = 420
+        player2.x = 1200
+        player2.y = 420
+        player1.score += 1
+        player2.health = 100
+
+    text8 = font3.render(str(player1.score) + ":" + str(player2.score), True, (0, 0, 0))
     
     display.fill((0, 200, 200))
     pygame.draw.rect(display, (100, 0, 0), land)
@@ -140,7 +159,11 @@ while running:
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(1145, 125, 410, 50))
     pygame.draw.rect(display, (0, 255, 0), pygame.Rect(1150, 130, player2.health * 4, 40))
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(220, 125, 110, 110))
-    display.blit(text1, (730, 165))
+    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(835, 125, 250, 210))
+    pygame.draw.rect(display, (200, 255, 255), pygame.Rect(840, 130, 240, 200))
+    display.blit(text1, (860, 150))
+    display.blit(text8, (920, 220))
+    
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(220, 125, 110, 110))
     settings_rect = pygame.draw.rect(display, (255, 255, 255), pygame.Rect(225, 130, 100, 100))
     settings_closerect = pygame.Rect(1090, 225, 50, 50)
