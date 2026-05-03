@@ -42,6 +42,7 @@ class Player:
         self.image_kick_right = pygame.transform.scale(self.image_kick, (400, 400))
         self.image_kick_left = pygame.transform.flip(self.image_kick_right, True, False)
         self.image = self.image_default
+        self.attack_type = "punch"
         self.attack_time = 0
         self.currently_attacking = False
         self.x = x
@@ -55,6 +56,33 @@ class Player:
         self.gravity = 1
         self.controls = controls
         self.score = 0
+    def getbody(self):
+        return pygame.Rect(self.x + 50, self.y + 50, 300, 320)
+    def getattack(self):
+        body = self.getbody()
+        if self.attack_type == "punch":
+            width = 100
+            height = 70
+            y = body.y + 70
+        elif self.attack_type == "kick":
+            width = 50
+            height = 30
+            y = body.y + 40
+        else:
+            return pygame.Rect(0, 0, 0, 0)
+        
+        if self.direction == "Left":
+            x = body.x - width
+        else:
+            x = body.x + width
+        
+        return pygame.Rect(x, y, width, height)
+    
+    def draw_hitboxes(self):
+        pygame.draw.rect(display, (255, 0, 0), self.getbody())
+        if self.currently_attacking == True:
+            pygame.draw.rect(display, (255, 255, 255), self.getattack())
+
     def movement(self, keys):
         if keys[self.controls.left]:
             self.x -= 1
@@ -64,7 +92,7 @@ class Player:
             self.direction = "Right"
         if keys[self.controls.up]:
             self.y -= 1
-        if keys[self.controls.down]:
+        if keys[self.controls.down] and self.y < 420:
             self.y += 1
     def attack(self, keys, opponent):
 
@@ -110,8 +138,8 @@ player2 = Player(1200, 420, Controls(
     right = pygame.K_RIGHT,
     up = pygame.K_UP,
     down = pygame.K_DOWN,
-    punch = pygame.K_q,
-    kick = pygame.K_e,
+    punch = pygame.K_z,
+    kick = pygame.K_c,
     ))
 
 while running:
@@ -143,16 +171,21 @@ while running:
 
     text8 = font3.render(str(player1.score) + ":" + str(player2.score), True, (0, 0, 0))
     
-    display.fill((0, 200, 200))
-    pygame.draw.rect(display, (100, 0, 0), land)
+    display.fill((100, 220, 200))
+    pygame.draw.rect(display, (150, 20, 20), land)
+    pygame.draw.rect(display, (0, 0, 0), pygame.Rect(0, 795, 2000, 10))
 
     player1.movement(keys)
     display.blit(player1.image, (player1.x, player1.y))
 
     player1.attack(keys, player2)
 
+    player1.draw_hitboxes()
+
     player2.movement(keys)
     display.blit(player2.image, (player2.x, player2.y))
+
+    player2.draw_hitboxes()
 
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(365, 125, 410, 50))
     pygame.draw.rect(display, (0, 255, 0), pygame.Rect(370, 130, player1.health * 4, 40))
