@@ -61,20 +61,23 @@ class Player:
     def getattack(self):
         body = self.getbody()
         if self.attack_type == "punch":
-            width = 100
-            height = 70
+            width = 143
+            height = 75
             y = body.y + 70
         elif self.attack_type == "kick":
-            width = 50
-            height = 30
-            y = body.y + 40
+            width = 110
+            height = 170
+            y = body.y + 155
         else:
             return pygame.Rect(0, 0, 0, 0)
         
         if self.direction == "Left":
-            x = body.x - width
+            if self.attack_type == "punch":
+                x = body.x - width + 93
+            else:
+                x = body.x - width + 126
         else:
-            x = body.x + width
+            x = body.x + width + 64
         
         return pygame.Rect(x, y, width, height)
     
@@ -84,10 +87,10 @@ class Player:
             pygame.draw.rect(display, (255, 255, 255), self.getattack())
 
     def movement(self, keys):
-        if keys[self.controls.left]:
+        if keys[self.controls.left] and self.x > 135:
             self.x -= 1
             self.direction = "Left"
-        if keys[self.controls.right]:
+        if keys[self.controls.right] and self.x < 1385:
             self.x += 1
             self.direction = "Right"
         if keys[self.controls.up]:
@@ -97,6 +100,7 @@ class Player:
     def attack(self, keys, opponent):
 
         if keys[self.controls.punch] and self.currently_attacking == False:
+            self.attack_type = "punch"
             self.currently_attacking = True
             if self.direction == "Right":
                 self.image = self.image_punch_right
@@ -105,6 +109,7 @@ class Player:
             self.attack_time = 60
 
         elif keys[self.controls.kick] and self.currently_attacking == False:
+            self.attack_type = "kick"
             self.currently_attacking = True
             if self.direction == "Right":
                 self.image = self.image_kick_right
@@ -114,7 +119,8 @@ class Player:
             
         if self.attack_time > 0:
             self.attack_time -= 1
-            if ((opponent.x - self.x) < 300 and self.direction == "Right") or ((self.x - opponent.x) < 300 and self.direction == "Left") and self.hitbefore == False:
+            if self.getattack().colliderect(opponent.getbody()) and not self.hitbefore:
+            #if ((opponent.x - self.x) < 300 and self.direction == "Right") or ((self.x - opponent.x) < 300 and self.direction == "Left") and self.hitbefore == False:
                 self.currently_attacking = False
                 self.attack_time = 0
                 opponent.health -= 10
@@ -180,12 +186,12 @@ while running:
 
     player1.attack(keys, player2)
 
-    player1.draw_hitboxes()
+    #player1.draw_hitboxes()
 
     player2.movement(keys)
     display.blit(player2.image, (player2.x, player2.y))
 
-    player2.draw_hitboxes()
+    #player2.draw_hitboxes()
 
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(365, 125, 410, 50))
     pygame.draw.rect(display, (0, 255, 0), pygame.Rect(370, 130, player1.health * 4, 40))
