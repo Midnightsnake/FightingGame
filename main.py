@@ -48,6 +48,7 @@ class Player:
         self.image = self.image_default
         self.attack_type = "punch"
         self.attack_time = 0
+        self.laser_time = 0
         self.currently_attacking = False
         self.x = x
         self.y = y
@@ -85,17 +86,17 @@ class Player:
             elif self.attack_type == "kick":
                 x = body.x - width + 126
             else:
-                x = body.x - width - 50
+                x = body.x - width - 300
         else:
             x = body.x + width + 64
         
         return pygame.Rect(x, y, width, height)
     
-    def draw_hitboxes(self):
+    #def draw_hitboxes(self):
         #pygame.draw.rect(display, (255, 0, 0), self.getbody())
-        if self.currently_attacking == True:
+        #if self.currently_attacking == True:
             #pygame.draw.rect(display, (255, 255, 255), self.getattack())
-            display.blit(self.image_laser_right, (self.x + 237, self.y - 31))
+            #display.blit(self.image_laser_left, (self.x + 237, self.y - 31))
 
     def movement(self, keys):
         if keys[self.controls.left] and self.x > 135:
@@ -108,6 +109,13 @@ class Player:
             self.y -= 1
         if keys[self.controls.down] and self.y < 420:
             self.y += 1
+
+    def laser(self):
+        if self.laser_time > 0 and self.direction == "Right":
+            display.blit(self.image_laser_right, (self.x + 237, self.y - 31))
+        elif self.laser_time > 0 and self.direction == "Left":
+            display.blit(self.image_laser_left, (self.x - 635, self.y - 31))
+
     def attack(self, keys, opponent):
 
         if keys[self.controls.punch] and self.currently_attacking == False:
@@ -133,12 +141,19 @@ class Player:
             self.currently_attacking = True
             if self.direction == "Right":
                 self.image = self.image_punch_right
-                display.blit(self.image_laser_right, (self.x, self.y))
             else:
                 self.image = self.image_punch_left
-                display.blit(self.image_laser_right, (self.x, self.y))
             self.attack_time = 60
+            self.laser_time = 60
             
+        if self.laser_time > 0:
+            self.laser_time -= 1
+            if self.getattack().colliderect(opponent.getbody()) and not self.hitbefore:
+            #if ((opponent.x - self.x) < 300 and self.direction == "Right") or ((self.x - opponent.x) < 300 and self.direction == "Left") and self.hitbefore == False:
+                self.currently_attacking = False
+                self.laser_time = 0
+                opponent.health -= 10
+                self.hitbefore = True
         if self.attack_time > 0:
             self.attack_time -= 1
             if self.getattack().colliderect(opponent.getbody()) and not self.hitbefore:
@@ -208,14 +223,16 @@ while running:
     player1.movement(keys)
     display.blit(player1.image, (player1.x, player1.y))
 
+    player1.laser()
+
     player1.attack(keys, player2)
 
-    player1.draw_hitboxes()
+    #player1.draw_hitboxes()
 
     player2.movement(keys)
     display.blit(player2.image, (player2.x, player2.y))
 
-    player2.draw_hitboxes()
+    #player2.draw_hitboxes()
 
     pygame.draw.rect(display, (0, 0, 0), pygame.Rect(365, 125, 410, 50))
     pygame.draw.rect(display, (0, 255, 0), pygame.Rect(370, 130, player1.health * 4, 40))
