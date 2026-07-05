@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from dataclasses import dataclass
 
@@ -61,6 +62,8 @@ class Player:
         self.gravity = 1
         self.controls = controls
         self.score = 0
+        self.ai_jump_timer = 0
+        self.ai_decision_cooldown = 0
     def getbody(self):
         return pygame.Rect(self.x + 50, self.y + 50, 300, 320)
     def getattack(self):
@@ -167,6 +170,59 @@ class Player:
             self.currently_attacking = False
             self.hitbefore = False
 
+    def ai_control(self, opponent):
+        distance = opponent.x - self.x
+        abs_distance = abs(distance)
+ 
+        # Face the opponent
+        self.direction = "Right" if distance > 0 else "Left"
+ 
+        ideal_range = 250
+ 
+        # Movement: close the gap if far away, occasionally back off if too close
+        if abs_distance > ideal_range:
+            self.x += self.speed if distance > 0 else -self.speed
+        elif abs_distance < ideal_range - 80 and not self.currently_attacking:
+            if random.random() < 0.03:
+                self.x += -self.speed if distance > 0 else self.speed
+ 
+        # Simple jump arc so the bot occasionally hops
+        if self.ai_jump_timer > 0:
+            self.ai_jump_timer -= 1
+            self.y -= 1
+        elif self.y < 420:
+            self.y += 1
+        elif random.random() < 0.004:
+            self.ai_jump_timer = 10
+ 
+        self.ai_attack(opponent, abs_distance)
+ 
+    def ai_attack(self, opponent, distance):
+        if self.attack_time > 0:
+            self.attack_time -= 1
+ 
+        # Decide to start a new attack
+        if not self.currently_attacking and distance < 300 and random.random() < 0.04:
+            self.currently_attacking = True
+            self.attack_type = random.choice(["punch", "kick", "laser"])
+            if self.attack_type == "punch":
+                self.image = self.image_punch_right if self.direction == "Right" else self.image_punch_left
+            elif self.attack_type == "kick":
+                self.image = self.image_kick_right if self.direction == "Right" else self.image_kick_left
+            else:
+                self.image = self.image_laser_right if self.direction == "Right" else self.image_laser_left
+            self.attack_time = 60
+ 
+        if self.currently_attacking:
+            if distance < 300 and not self.hitbefore:
+                opponent.health -= 10
+                self.hitbefore = True
+            if self.attack_time <= 0:
+                self.currently_attacking = False
+                self.hitbefore = False
+                self.image = self.image_default
+ 
+
 player1 = Player(350, 420, Controls(
     left = pygame.K_a,
     right = pygame.K_d,
@@ -229,6 +285,7 @@ while running:
 
     #player1.draw_hitboxes()
 
+    player2.ai_control(player1)
     player2.movement(keys)
     display.blit(player2.image, (player2.x, player2.y))
 
